@@ -42,7 +42,7 @@ str(activity)
 
 ## What is mean total number of steps taken per day?
 
-### 1. Make a histogram of the total number of steps taken each day
+1. Make a histogram of the total number of steps taken each day
 
 The following code will aggregate all the steps per day and store it in a new variable.
 Then this new variable is used to plot a bar graph having the date in the x axis and the amount of steps in the y axis.
@@ -50,25 +50,25 @@ Then this new variable is used to plot a bar graph having the date in the x axis
 
 
 ```r
-steps.aggregate <- aggregate(steps~date,activity,sum)
-hist(steps.aggregate$steps, xlab="Total steps by day", ylab="Frequency [Days]",main="Histogram : Number of daily steps")
+steps.date <- aggregate(steps~date,activity,sum)
+hist(steps.date$steps, xlab="Total steps by day", ylab="Frequency [Days]",main="Histogram : Number of daily steps")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
 
-### 2. Calculate and report the **mean** and **median** total number of steps taken per day
+2. Calculate and report the **mean** and **median** total number of steps taken per day
+
+The values will be calculated and stored in variables to be compared further in the exercise.
 
 
 ```r
-mean(steps.aggregate$steps, na.rm=TRUE)
+mean1 <- mean(steps.date$steps, na.rm=TRUE)
+median1 <- median(steps.date$steps, na.rm=TRUE)
 ```
+
 
 ```
 ## [1] 10766.19
-```
-
-```r
-median(steps.aggregate$steps, na.rm=TRUE)
 ```
 
 ```
@@ -78,15 +78,88 @@ median(steps.aggregate$steps, na.rm=TRUE)
 
 ## What is the average daily activity pattern?
 
+1. Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
+Aggregate the steps per interval (i.e. 05, 10, 15...) and also calculates the mean for each interval. This calculated mean value is then plotted as a time series.
+
+```r
+steps.interval <- aggregate(steps ~ interval, data=activity, FUN=mean)
+plot(steps.interval, type="l",xlab="interval [in 5min]", ylab="Average daily activity pattern of steps",  main="average number of steps")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
+
+
+2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+
+
+```r
+steps.interval$interval[which.max(steps.interval$steps)]
+```
+
+```
+## [1] 835
+```
 
 
 ## Inputing missing values
 
+There are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data.
+
+1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
 
 
+```r
+sum(is.na(activity))
+```
 
+```
+## [1] 2304
+```
+
+2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
+
+Since it is already calculated and represented as another variable, I will use the mean of steps for the 05 minute interval.
+
+3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+Using the strategy described in step 2 above, will create the new data frame **activity.merged** which will replace all NA (from the steps column) with the mean of steps for the 05 minute interval.
+
+```r
+activity.merged = merge(activity, steps.interval, by="interval")
+activity.merged$steps.x[is.na(activity.merged$steps.x)] = activity.merged$steps.y[is.na(activity.merged$steps.x)]
+```
+
+4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+
+To be able to plot the histogram it is necessary to recalculate the aggregation of steps.
+
+```r
+activity.merged <- aggregate(steps.x~interval,activity.merged,sum)
+hist(activity.merged$steps.x, xlab="Total steps by day", ylab="Frequency [Days]",main="Histogram : Number of daily steps")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-9-1.png) 
+
+Now, recalculate the mean and median total number os steps taken per day.
+
+```r
+mean2 <- mean(activity.merged$steps, na.rm=TRUE)
+median2 <- median(activity.merged$steps, na.rm=TRUE)
+```
+
+
+```
+## [1] 2280.339
+```
+
+```
+## [1] 2080.906
+```
+
+***Analysis:*** The histogram now has many more acumulated values under 2000 steps a day - even the shape of the new histogram has changed. The values of mean and median also follow this pattern since they went from more than 7500 to 
 ## Are there differences in activity patterns between weekdays and weekends?
+
 
 
 
