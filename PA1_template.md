@@ -157,9 +157,47 @@ median2 <- median(activity.merged$steps, na.rm=TRUE)
 ## [1] 2080.906
 ```
 
-***Analysis:*** The histogram now has many more acumulated values under 2000 steps a day - even the shape of the new histogram has changed. The values of mean and median also follow this pattern since they went from more than 7500 to 
+***Analysis:*** The histogram now has many more acumulated values under 2000 steps a day - even the shape of the new histogram has changed. The values of mean and median also follow this pattern since they went from more than 10000 to less than 3000. Replacing the NA values for the steps by a very low value, completely changed the scenario.
+
 ## Are there differences in activity patterns between weekdays and weekends?
 
+1. Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
 
+
+```r
+daytype <- function(date) {
+    if (weekdays(as.Date(date)) %in% c("Saturday", "Sunday")) {
+        "weekend"
+    } else {
+        "weekday"
+    }
+}
+activity$daytype <- as.factor(sapply(activity$date, daytype))
+str(activity)
+```
+
+```
+## 'data.frame':	17568 obs. of  4 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : Factor w/ 61 levels "2012-10-01","2012-10-02",..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
+##  $ daytype : Factor w/ 2 levels "weekday","weekend": 1 1 1 1 1 1 1 1 1 1 ...
+```
+
+2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
+
+
+```r
+par(mfrow=c(2,1))
+for (type in c("weekend", "weekday")) {
+    steps.type <- aggregate(steps ~ interval,
+                            data=activity,
+                            subset=activity$daytype==type,
+                            FUN=mean)
+    plot(steps.type, type="l", main=type)
+}
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-13-1.png) 
 
 
